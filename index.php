@@ -3,22 +3,25 @@ session_start();
 require_once("req_connect.php");
 require ("functions.php");
 
+//Si on vient du formulaire :
+if (isset($_POST['logok'])) {
 
-$username=$_POST["username"];
-if (isset($_POST["mdp"])){
-     $mdp = get_user_pwd($bdd,$_POST["password"]);
-} 
-if (isset($_POST["logok"])) {
-    $username = $_POST["username"];
-    echo get_user_pwd($bdd, $username);
-    echo check_pwd($bdd,$username,$mdp);
-    
+    $username = $_POST['username'];
+    $pwd      = $_POST['mdp'];
+
+    if (check_pwd($bdd,$username,$pwd) === true){
+       $_SESSION['username'] = $username;
+    } else {
+       echo "Identifiant ou mot de passe incorrects";
+    }
 }
-if (check_pwd($bdd,"test","toto") == true){
-   echo "c'est le bon mdp";
-} else {
-   echo "ce n'est pas le bon mdp";
+
+//Si on l'utilisateur a cliqué sur le lien de déconnexion :
+if (isset($_GET['action']) && $_GET['action'] == 'logout'){
+    session_destroy(); //Détruit la session sur le serveur
+    $_SESSION = null;  //Vide la variable de session
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -51,6 +54,13 @@ if (check_pwd($bdd,"test","toto") == true){
             <li><a href="register.php">Créer un compte</a></li>
             <li class="active dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Se Connecter <b class="caret"></b></a>
                 <ul class="dropdown-menu">
+                    <?php if (isset($_SESSION['username'])) { ?>
+                    <li>
+                        <p>Vous êtes connecté en tant que <?=$_SESSION['username']?></p>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="text-center"><h4><a href="?action=logout">Se déconnecter</a></h4></li>
+                    <?php } else { ?>
                     <li>
                         <form action="index.php" method="post">
                             <legend class="text-center">Connexion</legend>                                         
@@ -62,8 +72,7 @@ if (check_pwd($bdd,"test","toto") == true){
                             </li>
                         </form>
                     </li>
-                    <li class="divider"></li>
-                    <li class="text-center"><h4><a href="#">Se déconnecter</a></h4></li>
+                    <?php } ?>
                 </ul>
             </li>
         </ul>
@@ -72,7 +81,7 @@ if (check_pwd($bdd,"test","toto") == true){
 <li class="divider"></li>
 <div class="row page-header text-center">
 
-    <h1>Bienvenue chez Grogro</h1>
+<h1>Bienvenue chez Grogro</h1>
 </div>
 <div class="text-center">
     <ul class="thumbnails">
